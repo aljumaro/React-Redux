@@ -1,15 +1,29 @@
 import React, { Component } from 'react';
-import { createStore } from 'redux';
 import { render } from 'react-dom';
 
-import todosApp from './stores/todosApp';
-
-const appStore = createStore(todosApp);
+import appStore from './stores/todoAppStore';
+import FilterLink from './components/filterLink';
 
 let externalId = 0;
 
+const getVisibleTodos = (todos, filter) => {
+
+	switch(filter) {
+		case 'SHOW_COMPLETED':
+			return todos.filter(t => t.completed);
+		case 'SHOW_ACTIVE':
+			return todos.filter(t => !t.completed);
+		default:
+			return todos;
+	}
+}
+
 class App extends Component {
 	render() {
+		const {todos, visibilityFilter} = this.props;
+
+		const visibleTodos = getVisibleTodos(todos, visibilityFilter);
+
 		return (
 			<div>
 				<input ref={(node) => {
@@ -25,7 +39,7 @@ class App extends Component {
 					}}>
 				Add todo</button>
 				<ul>
-					{this.props.todos.map(t => 
+					{visibleTodos.map(t => 
 							<li 
 								key={t.id}
 								onClick={ () => {
@@ -43,12 +57,18 @@ class App extends Component {
 						)
 					}
 				</ul>
+				<p>
+					Show: &nbsp;
+					<FilterLink filter='SHOW_ALL' current={visibilityFilter}>All</FilterLink>&nbsp;
+					<FilterLink filter='SHOW_ACTIVE' current={visibilityFilter}>Active</FilterLink>&nbsp;
+					<FilterLink filter='SHOW_COMPLETED' current={visibilityFilter}>Completed</FilterLink>&nbsp;
+				</p>
 			</div>
 		)
 	}
 }
 
-const appRender = () => render(<App todos={appStore.getState().todos}/>, document.getElementById('root'));
+const appRender = () => render(<App {...appStore.getState()}/>, document.getElementById('root'));
 
 appStore.subscribe(appRender);
 
