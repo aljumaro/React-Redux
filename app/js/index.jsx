@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 
 import appStore from './stores/todoAppStore';
 import FilterLink from './components/filterLink';
+import TodoList from './components/todoList';
 
 let externalId = 0;
 
@@ -38,25 +39,15 @@ class App extends Component {
 						this.input.value = '';
 					}}>
 				Add todo</button>
-				<ul>
-					{visibleTodos.map(t => 
-							<li 
-								key={t.id}
-								onClick={ () => {
-									appStore.dispatch({
-										type: 'TOGGLE_TODO',
-										id: t.id,
-									});
-								}}
-								style={{
-										textDecoration: t.completed ? 'line-through': 'none'
-									}}
-							>
-								{t.text}
-							</li>
-						)
-					}
-				</ul>
+				<TodoList
+					todos={visibleTodos}
+					onTodoClick={ id => {
+						appStore.dispatch({
+							type: 'TOGGLE_TODO',
+							id,
+						});
+					}}
+				/>
 				<p>
 					Show: &nbsp;
 					<FilterLink filter='SHOW_ALL' current={visibilityFilter}>All</FilterLink>&nbsp;
