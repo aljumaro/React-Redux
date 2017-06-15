@@ -1,66 +1,22 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { render } from 'react-dom';
+import { Provider } from 'react-redux';
 
 import appStore from './stores/todoAppStore';
-import FilterLink from './components/filterLink';
-import TodoList from './components/todoList';
+import VisibleTodoList from './components/visibleTodoList';
+import AddTodo from './components/addTodo';
+import Footer from './components/footer';
 
-let externalId = 0;
+const App = () => 
+	<div>
+		<AddTodo />
+		<VisibleTodoList/>
+		<Footer/>
+	</div>
+	
 
-const getVisibleTodos = (todos, filter) => {
-
-	switch(filter) {
-		case 'SHOW_COMPLETED':
-			return todos.filter(t => t.completed);
-		case 'SHOW_ACTIVE':
-			return todos.filter(t => !t.completed);
-		default:
-			return todos;
-	}
-}
-
-class App extends Component {
-	render() {
-		const {todos, visibilityFilter} = this.props;
-
-		const visibleTodos = getVisibleTodos(todos, visibilityFilter);
-
-		return (
-			<div>
-				<input ref={(node) => {
-					this.input = node;
-				}}/>
-				<button onClick={ () => {
-						appStore.dispatch({
-							type: 'ADD_TODO',
-							id: externalId++,
-							text: this.input.value
-						});
-						this.input.value = '';
-					}}>
-				Add todo</button>
-				<TodoList
-					todos={visibleTodos}
-					onTodoClick={ id => {
-						appStore.dispatch({
-							type: 'TOGGLE_TODO',
-							id,
-						});
-					}}
-				/>
-				<p>
-					Show: &nbsp;
-					<FilterLink filter='SHOW_ALL' current={visibilityFilter}>All</FilterLink>&nbsp;
-					<FilterLink filter='SHOW_ACTIVE' current={visibilityFilter}>Active</FilterLink>&nbsp;
-					<FilterLink filter='SHOW_COMPLETED' current={visibilityFilter}>Completed</FilterLink>&nbsp;
-				</p>
-			</div>
-		)
-	}
-}
-
-const appRender = () => render(<App {...appStore.getState()}/>, document.getElementById('root'));
-
-appStore.subscribe(appRender);
-
-appRender();
+render(
+	<Provider store={appStore}>
+		<App />
+	</Provider>
+	, document.getElementById('root'));
